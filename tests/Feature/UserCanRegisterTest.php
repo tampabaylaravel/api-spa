@@ -23,15 +23,14 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function userCanRegister()
     {
-        $oauthClient = factory(Client::class)->states('password')->create();
         $response = $this->postJson('api/register', [
             'name' => 'James',
             'email' => 'fatboyxpc@gmail.com',
             'password' => 'secret',
             'password_confirmation' => 'secret',
             'grant_type' => 'password',
-            'client_id' => $oauthClient->id,
-            'client_secret' => $oauthClient->secret,
+            'client_id' => $this->oauthClient->id,
+            'client_secret' => $this->oauthClient->secret,
             'scope' => '*',
         ]);
 
