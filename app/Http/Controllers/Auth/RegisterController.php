@@ -3,10 +3,17 @@
 namespace App\Http\Controllers\Auth;
 
 use App\User;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Validator;
+use Psr\Http\Message\ServerRequestInterface;
+use Zend\Diactoros\Response as Psr7Response;
+use League\OAuth2\Server\AuthorizationServer;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Laravel\Passport\Http\Controllers\HandlesOAuthErrors;
+use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
 
 class RegisterController extends Controller
 {
@@ -21,7 +28,7 @@ class RegisterController extends Controller
     |
     */
 
-    use RegistersUsers;
+    use HandlesOAuthErrors;
 
     /**
      * Where to redirect users after registration.
@@ -35,8 +42,10 @@ class RegisterController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(AuthorizationServer $server)
     {
+        $this->server = $server;
+
         $this->middleware('guest');
     }
 
@@ -68,5 +77,33 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+    }
+
+    public function register(Request $request)
+    {
+        $this->validator($request->all())->validate();
+
+        event(new Registered($user = $this->create($request->all())));
+
+        $request->merge([
+            'username' => $request->input('email'),
+        ]);
+
+        $response = $this->issueToken((new DiactorosFactory)->createRequest($request));
+
+        if ($response->getStatusCode() == 200) {
+            $response->setStatusCode(201);
+        }
+
+        return $response;
+    }
+
+    private function issueToken(ServerRequestInterface $request)
+    {
+        return $this->withErrorHandling(function () use ($request) {
+            return $this->convertResponse(
+                $this->server->respondToAccessTokenRequest($request, new Psr7Response)
+            );
+        });
     }
 }
