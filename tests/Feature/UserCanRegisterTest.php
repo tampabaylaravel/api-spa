@@ -13,6 +13,13 @@ class UserCanRegisterTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp()
+    {
+        parent::setUp();
+
+        $this->oauthClient = factory(Client::class)->states('password')->create();
+    }
+
     /** @test */
     public function userCanRegister()
     {
@@ -168,5 +175,54 @@ class UserCanRegisterTest extends TestCase
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors('password');
+    }
+
+    private function validOauthParams($overrides = [])
+    {
+        return array_merge($this->validParams([
+            'grant_type' => 'password',
+            'client_id' => $this->oauthClient->id,
+            'client_secret' => $this->oauthClient->secret,
+        ]), $overrides);
+    }
+
+    /** @test */
+    public function userCannotRegisterWithoutValidGrantType()
+    {
+        $response = $this->postJson('api/register', $this->validOauthParams([
+            'grant_type' => '',
+        ]));
+
+        $response->assertStatus(400);
+
+        $json = $response->json();
+        $this->assertEquals('unsupported_grant_type', $json['error']);
+    }
+
+    /** @test */
+    public function userCannotRegisterWithoutValidClientId()
+    {
+        $response = $this->postJson('api/register', $this->validOauthParams([
+            'client_id' => '',
+        ]));
+
+        $response->assertStatus(400);
+
+        $json = $response->json();
+        $this->assertEquals('invalid_request', $json['error']);
+        $this->assertContains('client_id', $json['hint']);
+    }
+
+    /** @test */
+    public function userCannotRegisterWithoutValidClientSecret()
+    {
+        $response = $this->postJson('api/register', $this->validOauthParams([
+            'client_secret' => '',
+        ]));
+
+        $response->assertStatus(401);
+
+        $json = $response->json();
+        $this->assertEquals('invalid_client', $json['error']);
     }
 }
