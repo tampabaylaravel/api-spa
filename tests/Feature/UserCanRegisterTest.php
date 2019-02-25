@@ -18,12 +18,13 @@ class UserCanRegisterTest extends TestCase
         parent::setUp();
 
         $this->oauthClient = factory(Client::class)->states('password')->create();
+        $this->route = 'api/register';
     }
 
     /** @test */
     public function userCanRegister()
     {
-        $response = $this->postJson('api/register', [
+        $response = $this->postJson($this->route, [
             'name' => 'James',
             'email' => 'fatboyxpc@gmail.com',
             'password' => 'secret',
@@ -52,7 +53,7 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function theseFieldsAreRequiredToRegister()
     {
-        $response = $this->postJson('api/register');
+        $response = $this->postJson($this->route);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
@@ -75,7 +76,7 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function nameMustBeString()
     {
-        $response = $this->postJson('api/register', $this->validParams([
+        $response = $this->postJson($this->route, $this->validParams([
             'name' => 123,
         ]));
 
@@ -86,7 +87,7 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function nameMustNotBeGreaterThan255Characters()
     {
-        $response = $this->postJson('api/register', $this->validParams([
+        $response = $this->postJson($this->route, $this->validParams([
             'name' => str_random(256),
         ]));
 
@@ -97,7 +98,7 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function emailMustBeString()
     {
-        $response = $this->postJson('api/register', $this->validParams([
+        $response = $this->postJson($this->route, $this->validParams([
             'email' => 123,
         ]));
 
@@ -108,7 +109,7 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function emailMustBeValidEmailAddress()
     {
-        $response = $this->postJson('api/register', $this->validParams([
+        $response = $this->postJson($this->route, $this->validParams([
             'email' => 'fatboyxpc',
         ]));
 
@@ -119,7 +120,7 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function emailMustNotBeGreaterThan255Characters()
     {
-        $response = $this->postJson('api/register', $this->validParams([
+        $response = $this->postJson($this->route, $this->validParams([
             'email' => str_random(256),
         ]));
 
@@ -134,7 +135,7 @@ class UserCanRegisterTest extends TestCase
             'email' => 'fatboyxpc@gmail.com',
         ]);
 
-        $response = $this->postJson('api/register', $this->validParams([
+        $response = $this->postJson($this->route, $this->validParams([
             'email' => 'fatboyxpc@gmail.com',
         ]));
 
@@ -145,7 +146,7 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function passwordMustBeString()
     {
-        $response = $this->postJson('api/register', $this->validParams([
+        $response = $this->postJson($this->route, $this->validParams([
             'password' => 123456,
         ]));
 
@@ -156,7 +157,7 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function passwordMustNotBeLessThan6Characters()
     {
-        $response = $this->postJson('api/register', $this->validParams([
+        $response = $this->postJson($this->route, $this->validParams([
             'password' => str_random(5),
         ]));
 
@@ -167,7 +168,7 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function passwordMustMatchConfirmation()
     {
-        $response = $this->postJson('api/register', $this->validParams([
+        $response = $this->postJson($this->route, $this->validParams([
             'password' => 'secret',
             'password_confirmation' => 'secret2',
         ]));
@@ -188,7 +189,7 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function userCannotRegisterWithoutValidGrantType()
     {
-        $response = $this->postJson('api/register', $this->validOauthParams([
+        $response = $this->postJson($this->route, $this->validOauthParams([
             'grant_type' => '',
         ]));
 
@@ -201,7 +202,7 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function userCannotRegisterWithoutValidClientId()
     {
-        $response = $this->postJson('api/register', $this->validOauthParams([
+        $response = $this->postJson($this->route, $this->validOauthParams([
             'client_id' => '',
         ]));
 
@@ -215,7 +216,7 @@ class UserCanRegisterTest extends TestCase
     /** @test */
     public function userCannotRegisterWithoutValidClientSecret()
     {
-        $response = $this->postJson('api/register', $this->validOauthParams([
+        $response = $this->postJson($this->route, $this->validOauthParams([
             'client_secret' => '',
         ]));
 
