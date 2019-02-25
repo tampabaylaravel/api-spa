@@ -73,59 +73,42 @@ class UserCanRegisterTest extends TestCase
         ], $overrides);
     }
 
+    private function validationTest($data = [])
+    {
+        $response = $this->postJson($this->route, $this->validParams($data));
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(array_keys($data));
+    }
+
     /** @test */
     public function nameMustBeString()
     {
-        $response = $this->postJson($this->route, $this->validParams([
-            'name' => 123,
-        ]));
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors('name');
+        $this->validationTest(['name' => 123]);
     }
 
     /** @test */
     public function nameMustNotBeGreaterThan255Characters()
     {
-        $response = $this->postJson($this->route, $this->validParams([
-            'name' => str_random(256),
-        ]));
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors('name');
+       $this->validationTest(['name' => str_random(256)]);
     }
 
     /** @test */
     public function emailMustBeString()
     {
-        $response = $this->postJson($this->route, $this->validParams([
-            'email' => 123,
-        ]));
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors('email');
+        $this->validationTest(['email' => 123]);
     }
 
     /** @test */
     public function emailMustBeValidEmailAddress()
     {
-        $response = $this->postJson($this->route, $this->validParams([
-            'email' => 'fatboyxpc',
-        ]));
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors('email');
+        $this->validationTest(['email' => 'fatboyxpc']);
     }
 
     /** @test */
     public function emailMustNotBeGreaterThan255Characters()
     {
-        $response = $this->postJson($this->route, $this->validParams([
-            'email' => str_random(256),
-        ]));
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors('email');
+        $this->validationTest(['email' => str_random(256)]);
     }
 
     /** @test */
@@ -135,34 +118,19 @@ class UserCanRegisterTest extends TestCase
             'email' => 'fatboyxpc@gmail.com',
         ]);
 
-        $response = $this->postJson($this->route, $this->validParams([
-            'email' => 'fatboyxpc@gmail.com',
-        ]));
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors('email');
+        $this->validationTest(['email' => 'fatboyxpc@gmail.com']);
     }
 
     /** @test */
     public function passwordMustBeString()
     {
-        $response = $this->postJson($this->route, $this->validParams([
-            'password' => 123456,
-        ]));
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors('password');
+        $this->validationTest(['password' => 123456]);
     }
 
     /** @test */
     public function passwordMustNotBeLessThan6Characters()
     {
-        $response = $this->postJson($this->route, $this->validParams([
-            'password' => str_random(5),
-        ]));
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors('password');
+        $this->validationTest(['password' => str_random(5)]);
     }
 
     /** @test */
