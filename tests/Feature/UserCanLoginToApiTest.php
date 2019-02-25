@@ -27,14 +27,11 @@ class UserCanLoginToApiTest extends TestCase
     /** @test */
     public function userCanGetAccessTokenAfterLoggingIn()
     {
-        $oauthClient = factory(Client::class)->states('password')->create();
-        $user = factory(User::class)->create();
-
         $response = $this->postJson('api/auth/token', [
             'grant_type' => 'password',
-            'client_id' => $oauthClient->id,
-            'client_secret' => $oauthClient->secret,
-            'username' => $user->email,
+            'client_id' => $this->oauthClient->id,
+            'client_secret' => $this->oauthClient->secret,
+            'username' => $this->user->email,
             'password' => 'secret',
             'scope' => '*',
         ]);
