@@ -11,6 +11,6 @@
 |
 */
 
-Route::view('password/reset/{token}', 'welcome')->name('password.reset');
+Route::view('password/reset/{token}', 'spa-client')->name('password.reset');
 
-Route::view('{any}', 'welcome')->where('any', '.*');
+Route::view('{any}', 'spa-client')->where('any', '.*');
