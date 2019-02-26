@@ -14,3 +14,5 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::view('password/reset/{token}', 'welcome')->name('password.reset');
